@@ -57,12 +57,65 @@ class App extends Component {
     }).then(this.updateCustList());
   };
 
+  searchNumber = () => {
+    const phone = document.getElementById("phoneSearch");
+
+    fetch(`http://localhost:10010/customer/phone/${phone.value}`, {
+      method: "GET",
+      headers: {
+        "Content-type": "application/json"
+      }
+    })
+      .then(r => r.json())
+      .then(numList => this.setState({ customers: numList }))
+      .then(() => (phone.value = ""));
+  };
+
+  addCustomer = e => {
+    e.preventDefault();
+    const form = document.getElementById("newCustomer");
+    const name = document.getElementById("name").value;
+    const address = document.getElementById("address").value;
+    const phoneNumber = document.getElementById("phoneNumber").value;
+    const emailAddress = document.getElementById("email").value;
+    const birthDate = document.getElementById("birthDate").value;
+
+    fetch("http://localhost:10010/customer", {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json"
+      },
+      body: JSON.stringify({
+        name,
+        address,
+        phoneNumber: parseInt(phoneNumber),
+        emailAddress,
+        birthDate: parseInt(birthDate)
+      })
+    })
+      .then(form.reset())
+      .then(this.updateCustList());
+  };
+
   render() {
     let toggle = this.state.toggle;
     return toggle ? (
       <div className="App">
         <h2>Customer List</h2>
-        <input type="text" placeholder="SearchByPhone.." />
+        <button onClick={this.updateCustList}>All Customers</button>
+        <br />
+        <br />
+        <form id="newCustomer">
+          <input type="text" id="name" placeholder="Name" />
+          <input type="text" id="address" placeholder="Address" />
+          <input type="number" id="phoneNumber" placeholder="Phone Number" />
+          <input type="text" id="email" placeholder="Email" />
+          <input type="number" id="birthDate" placeholder="Birth Date" />
+          <button onClick={this.addCustomer}>Add Customer</button>
+        </form>
+        <br />
+        <input type="text" id="phoneSearch" placeholder="FindByPhone #" />
+        <button onClick={this.searchNumber}>Find</button>
         {this.state.customers.map(customer => {
           return (
             <p
